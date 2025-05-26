@@ -1,7 +1,21 @@
 # Scylla - AI-Powered AIOps Platform
 
 <div align="center">
-  <img src="Frontend/public/siteLogo.png" alt="Scylla Logo" width="300" height="300">
+  <img src="Frontend/public/siteLogo.png" alt="Scylla Logo" width="120" height="120"><br>
+  <h1>Scylla</h1>
+  <em>AI-Powered AIOps Platform for Intelligent Monitoring & Anomaly Detection</em>
+  <br><br>
+  <p>
+    <img src="https://img.shields.io/badge/Node.js-18.x-green?logo=node.js&logoColor=white" alt="Node.js">
+    <img src="https://img.shields.io/badge/Express.js-4.x-black?logo=express&logoColor=white" alt="Express.js">
+    <img src="https://img.shields.io/badge/React-18.x-61DAFB?logo=react&logoColor=white" alt="React">
+    <img src="https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite&logoColor=white" alt="Vite">
+    <img src="https://img.shields.io/badge/MongoDB-6.x-47A248?logo=mongodb&logoColor=white" alt="MongoDB">
+    <img src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white" alt="Docker">
+    <img src="https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white" alt="Python">
+    <img src="https://img.shields.io/badge/Prometheus-integrated-E6522C?logo=prometheus&logoColor=white" alt="Prometheus">
+    <img src="https://img.shields.io/badge/Loki-integrated-0A1A2F?logo=grafana&logoColor=white" alt="Loki">
+  </p>
 </div>
 
 Scylla is an advanced AI-powered AIOps (Artificial Intelligence for IT Operations) platform designed to provide intelligent monitoring, anomaly detection, and operational insights for modern IT infrastructure. Built with cutting-edge machine learning models and real-time data processing capabilities, Scylla helps organizations proactively identify and resolve operational issues before they impact business operations.
