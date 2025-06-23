@@ -20,32 +20,98 @@
 
 Scylla is an advanced AI-powered AIOps (Artificial Intelligence for IT Operations) platform designed to provide intelligent monitoring, anomaly detection, and operational insights for modern IT infrastructure. Built with cutting-edge machine learning models and real-time data processing capabilities, Scylla helps organizations proactively identify and resolve operational issues before they impact business operations.
 
+## 🎥 Demo
+
+<div align="center">
+  <a href="https://youtu.be/DoqCr0kBt-s">
+    <img src="https://img.shields.io/badge/📺_Watch_Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch Demo">
+  </a>
+  <br>
+  <em>🎬 Click above to watch the complete Scylla platform demonstration</em>
+</div>
+
+---
+
+## 📋 Table of Contents
+
+- [🚀 Features](#-features)
+  - [🤖 Real-time Anomaly Detection](#-real-time-anomaly-detection)
+  - [📊 Interactive Dashboards](#-interactive-dashboards)
+  - [🔔 Automated Response with n8n Workflows](#-automated-response-with-n8n-workflows)
+  - [🔗 Time-based Data Correlation](#-time-based-data-correlation)
+  - [🧠 Model Training](#-model-training)
+- [🏗️ Architecture](#️-architecture)
+- [🐳 Docker Deployment](#-docker-deployment)
+- [🛠️ Development Setup](#️-development-setup)
+
 ## 🚀 Features
 
-### 🔍 **Multi-Source Data Integration**
-- **Prometheus Integration**: Real-time metrics collection and monitoring
-- **Loki Integration**: Centralized log aggregation and analysis
-- **CSV Data Sources**: Custom data upload and analysis capabilities
-- **Unified Dashboard**: Single pane of glass for all data sources
+### 🤖 **Real-time Anomaly Detection**
 
-### 🤖 **Advanced Anomaly Detection**
-- **VAE-LSTM Models**: Deep learning-based log anomaly detection
-- **VAE-CNN Models**: Convolutional neural networks for metric anomaly detection
+#### **📊 Metrics Anomaly Detection with Prometheus**
+- **VAE-CNN Models**: Convolutional neural networks for real-time metric analysis
+  - CPU utilization pattern recognition
+  - Memory usage anomaly detection
+  - Network traffic pattern analysis
+  - Disk I/O anomaly identification
+- **Prometheus Integration**: Direct integration for real-time metrics collection
+  - Custom metric queries and aggregations
+  - Sub-minute detection latency
+  - Historical data analysis and trending
 - **Real-time Processing**: Continuous monitoring with instant anomaly alerts
 
-### 📊 **Intelligent Dashboards**
-- **Interactive Visualizations**: Line charts, bar charts, and data tables
-- **Real-time Updates**: Live data streaming and visualization
-- **Custom Views**: Tailored dashboards for different data sources
-- **Data Correlation**: Cross-source analysis and pattern identification
+#### **📝 Logs Anomaly Detection with Loki**
+- **VAE-LSTM Models**: Deep learning-based log sequence analysis for security monitoring
+  - Natural language processing for log message understanding
+  - Sequence pattern recognition for log flows
+  - Security incident detection in audit logs
+  - Suspicious user behavior identification
+- **Loki Integration**: Centralized log aggregation and real-time analysis
+  - Application logs, system logs, and security logs
+  - Log parsing and structured data extraction
+  - Real-time stream processing with immediate alerting
 
-### 🔔 **Smart Alerting & Notifications**
-- **Email Notifications**: Automated alerts for detected anomalies
-- **Real-time Monitoring**: Continuous background processing
-- **GPT-Powered Insights**: AI-generated best practices and recommendations
-- **Workflow Management**: Structured response workflows for incidents
+### 📊 **Interactive Dashboards**
+- **Real-time Visualizations**: Live data streaming with automatic refresh
+  - Line charts for time-series data trends
+  - Heat maps for correlation analysis
+  - Anomaly highlighting and visualization
+- **Multi-source Views**: Unified dashboard for Prometheus metrics and Loki logs
+- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- **Dark/Light Themes**: User preference-based theme switching
 
+### 🔔 **Automated Response with n8n Workflows**
+- **n8n Agentic Workflow Integration**: Advanced workflow automation for security responses
+  - Automated suspicious user account suspension
+  - Real-time threat response workflows
+  - Security incident containment procedures
+  - Adaptive response based on anomaly severity
+- **Intelligent Decision Making**: AI-powered workflow triggers
+  - Behavioral pattern analysis for user suspension decisions
+  - Risk assessment and automated response escalation
+  - Complete audit trail of automated security actions
 
+### 🔗 **Time-based Data Correlation**
+- **Cross-source Time Correlation**: Advanced time-series correlation between data sources
+  - Prometheus metrics to Loki logs correlation
+  - Time-window based event correlation
+  - Anomaly pattern correlation across different time ranges
+  - Performance impact analysis across service dependencies
+- **Temporal Pattern Recognition**: Time-based pattern identification
+  - Seasonal pattern detection in metrics and logs
+  - Time-shifted correlation analysis
+  - Predictive correlation for proactive monitoring
+
+### 🧠 **Model Training**
+- **Custom Model Training**: Train your own anomaly detection models
+  - VAE-LSTM training for custom log patterns
+  - VAE-CNN training for specific metric patterns
+  - Automated model retraining on new data patterns
+- **Model Management**: Complete model lifecycle management
+  - Model versioning and deployment
+  - Performance monitoring and evaluation
+  - Hyperparameter optimization
+  - Transfer learning capabilities
 
 ## 🏗️ Architecture
 
@@ -67,10 +133,14 @@ Scylla is an advanced AI-powered AIOps (Artificial Intelligence for IT Operation
 
 - **Model Serving**: FastAPI/Flask microservices for model inference
 
+### **Automation & Workflows**
+- **n8n Integration**: Agentic workflow automation platform
+- **Security Response Automation**: Automated user suspension workflows
+- **Real-time Decision Making**: AI-powered workflow triggers
+
 ### **Data Sources**
-- **Prometheus**: Metrics collection and querying
-- **Loki**: Log aggregation and search
-- **InfluxDB**: Time-series data storage
+- **Prometheus**: Real-time metrics collection and querying
+- **Loki**: Centralized log aggregation and search
 - **CSV Upload**: Custom data source support
 
 ## 🐳 Docker Deployment
@@ -175,46 +245,12 @@ LOKI_URL=http://localhost:3100
 INFLUXDB_URL=http://localhost:8086
 EMAIL_SERVICE_API_KEY=your-email-api-key
 GPT_API_KEY=your-openai-api-key
+N8N_WEBHOOK_URL=your-n8n-webhook-url
 ```
-
-## 📚 API Documentation
-
-### **Authentication Endpoints**
-- `POST /user/login` - User authentication
-- `POST /user/signup` - User registration
-- `GET /user/profile` - Get user profile
-
-### **Data Source Endpoints**
-- `GET /datasource` - List all data sources
-- `POST /datasource` - Create new data source
-- `PUT /datasource/:id` - Update data source
-- `DELETE /datasource/:id` - Delete data source
-
-### **Dashboard Endpoints**
-- `GET /dashboard` - Get dashboard data
-- `POST /render-panel` - Render dashboard panels
-
-### **Anomaly Detection Endpoints**
-- `POST /model/detect-logs` - Log anomaly detection
-- `POST /model/detect-metrics` - Metric anomaly detection
-- `POST /model/detect-csv` - CSV data anomaly detection
-
-### **Workflow & Correlation**
-- `GET /workflow` - Get user workflows
-- `POST /datacorrelation` - Correlate data sources
-
-## 🔧 Configuration
-
-### **Model Configuration**
-- VAE-LSTM: Configured for log sequence analysis
-- VAE-CNN: Optimized for time-series metric data
-- Hyperparameters: Tuned for optimal performance
-
-### **Monitoring Configuration**
-- Real-time processing: 30-second intervals
-- Alert thresholds: Configurable per data source
-- Email notifications: SMTP configuration required
 
 ---
 
-**Scylla** - Empowering IT Operations with Artificial Intelligence 🚀
+**Scylla** - AI-Powered Security & Anomaly Detection with Intelligent Automation 🚀
+
+*Empowering IT Operations with Real-time Anomaly Detection, Automated Response, and Intelligent Data Correlation*
+
