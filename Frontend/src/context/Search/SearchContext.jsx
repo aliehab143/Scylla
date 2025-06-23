@@ -33,7 +33,8 @@ export function SearchProvider({ children }) {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
+          'ngrok-skip-browser-warning': 'true',
+          Authorization: `Bearer ${user?.token}`,
         },
       });
 

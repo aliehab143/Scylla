@@ -191,6 +191,7 @@ export default function DataSourceForm() {
       const response = await fetch(`${BASE_URL}/datasource/upload/csv`, {
         method: "POST",
         headers: {
+          "ngrok-skip-browser-warning": "true",
           Authorization: `Bearer ${user?.token}`,
         },
         body: formData,

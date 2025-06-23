@@ -141,26 +141,29 @@ export default function SideMenu() {
             filter: "drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3))",
           }}
         />
-        <Box sx={{ flexGrow: 1 }}>
-          <GradientText
-            colors={["#667eea", "#764ba2", "#f093fb"]}
-            animationSpeed={4}
-            showBorder={false}
-            className="font-bold"
-          >
-            <Typography
-              variant="h5"
-              sx={{ 
-                fontWeight: 700, 
-                fontSize: '1.4rem',
-                letterSpacing: '0.5px',
-                lineHeight: 1.2,
-                margin: 0
-              }}
+        <Box sx={{ flexGrow: 1, overflow: "visible" }}>
+          <Box sx={{ overflow: "visible" }}>
+            <GradientText
+              colors={["#667eea", "#764ba2", "#f093fb"]}
+              animationSpeed={4}
+              showBorder={false}
+              className="font-bold side-menu-gradient-text"
             >
-              Scylla
-            </Typography>
-          </GradientText>
+              <Typography
+                variant="h5"
+                sx={{ 
+                  fontWeight: 700, 
+                  fontSize: '1.4rem',
+                  letterSpacing: '0.5px',
+                  lineHeight: 1.2,
+                  margin: 0,
+                  overflow: "visible"
+                }}
+              >
+                Scylla
+              </Typography>
+            </GradientText>
+          </Box>
           <Typography
             variant="caption"
             sx={{ 
@@ -170,7 +173,7 @@ export default function SideMenu() {
               letterSpacing: '0.3px'
             }}
           >
-            Analytics Platform
+            AI-OPS Platform
           </Typography>
         </Box>
       </LogoContainer>

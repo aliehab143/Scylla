@@ -185,6 +185,8 @@ export default function AddDashboardPage() {
         const response = await fetch(`${BASE_URL}/user/all`, {
           method: "GET",
           headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
             Authorization: `Bearer ${user?.token}`,
           },
         });
@@ -229,8 +231,9 @@ export default function AddDashboardPage() {
       const response = await fetch(`${BASE_URL}/dashboard/${selectedDataSource}`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${user?.token}`,
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+          Authorization: `Bearer ${user?.token}`,
         },
         body: JSON.stringify(payload),
       });

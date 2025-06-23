@@ -15,7 +15,7 @@
   font-weight: 500;
   backdrop-filter: blur(10px);
   transition: box-shadow 0.5s ease-out;
-  overflow: hidden;
+  overflow: visible;
   cursor: pointer;
 }
 
@@ -70,4 +70,17 @@
   -webkit-background-clip: text;
   color: transparent;
   animation: gradient linear infinite;
+  overflow: visible;
+  line-height: 1.2;
+  padding: 0.1em 0;
+}
+
+/* Custom styling for side menu GradientText */
+.side-menu-gradient-text.animated-gradient-text {
+  margin: 0;
+  border-radius: 0;
+  backdrop-filter: none;
+  background: transparent;
+  max-width: none;
+  justify-content: flex-start;
 }

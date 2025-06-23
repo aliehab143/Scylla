@@ -82,20 +82,21 @@ const detectTempAnomaly = async (req, res) => {
   }
 }
 
-const detectCpuAnomaly = async (metrics) => {
+const detectCpuAnomaly = async (values) => {
   try {
-    const response = await axios.post('http://127.0.0.1:5006/detect_anomalies',
+  
+    const metrics = { values }
+
+    const response = await axios.post(process.env.CPU_ANOMALY_DETECTOR_URL,
       metrics,
       {
         headers: {
           'Content-Type': 'application/json',
         },
       });
+    
+    return response.data;
 
-    // console.log('response.data ', response.data);
-    const { data } = response;
-    console.log('data is ', data)
-    return data;
   } catch (error) {
     console.log('error message is ',error.message)
     const  message  = error.message; 
@@ -106,9 +107,9 @@ const detectCpuAnomaly = async (metrics) => {
 }
 
 const detectLogsAnomaly = async (logs) => {
+  // 127.0.0.1:5007
   try {
-    const response = await axios.post('http://localhost:5007/detect_anomalies',logs);
-    console.log('response is ', response)
+    const response = await axios.post('http://127.0.0.1:5007/detect_anomalies',logs)
     const data = response.data;
     return data
     

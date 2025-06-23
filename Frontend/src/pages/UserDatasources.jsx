@@ -52,28 +52,80 @@ export default function UserDataSources() {
   const fetchDataSources = async () => {
     setLoading(true);
     try {
+      console.log('🚀 Fetching data sources from:', `${BASE_URL}/user/all`);
+      console.log('👤 User token exists:', !!user?.token);
+      
       const response = await fetch(`${BASE_URL}/user/all`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true", // Skip ngrok browser warning
           Authorization: `Bearer ${user?.token}`, // Pass JWT token
         },
       });
 
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response ok:', response.ok);
+      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+      console.log('📡 Response content-type:', response.headers.get('content-type'));
+
+      // Check if response is actually JSON
+      const contentType = response.headers.get('content-type');
+      const isJson = contentType && contentType.includes('application/json');
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to fetch data sources.");
+        console.error('❌ Response not ok, status:', response.status);
+        
+        // Try to get response text first
+        const responseText = await response.text();
+        console.error('❌ Error response text:', responseText);
+        
+        if (isJson && responseText) {
+          try {
+            const errorData = JSON.parse(responseText);
+            throw new Error(errorData.message || "Failed to fetch data sources.");
+          } catch (parseError) {
+            console.error('❌ Failed to parse error response as JSON:', parseError);
+            throw new Error(`Server error (${response.status}): ${responseText.substring(0, 200)}`);
+          }
+        } else {
+          throw new Error(`Server error (${response.status}): ${responseText || 'Unknown error'}`);
+        }
       }
 
-      const data = await response.json();
-      console.log(data);
-      setDataSources(data.data[0]?.datasources || []); // Assuming data structure
+      // Get response text first
+      const responseText = await response.text();
+      console.log('✅ Response text (first 500 chars):', responseText.substring(0, 500));
+      
+      if (!isJson) {
+        console.error('❌ Response is not JSON. Content-Type:', contentType);
+        console.error('❌ Full response text:', responseText);
+        throw new Error(`Server returned non-JSON response. Expected JSON but got: ${contentType || 'unknown'}`);
+      }
+
+      // Parse JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log('✅ Parsed data:', data);
+      } catch (parseError) {
+        console.error('❌ Failed to parse response as JSON:', parseError);
+        console.error('❌ Response text that failed to parse:', responseText);
+        throw new Error('Server returned invalid JSON response');
+      }
+
+      setDataSources(data.data?.[0]?.datasources || []); // Assuming data structure
       setError("");
+      console.log('✨ Successfully set', data.data?.[0]?.datasources?.length || 0, 'data sources');
+      
     } catch (err) {
-      console.error("Error fetching data sources:", err);
+      console.error("💥 Error fetching data sources:", err);
+      console.error("💥 Error message:", err.message);
+      console.error("💥 Error stack:", err.stack);
       setError(err.message || "An error occurred while fetching data sources.");
     } finally {
       setLoading(false);
+      console.log('🏁 fetchDataSources completed');
     }
   };
 
@@ -94,21 +146,47 @@ export default function UserDataSources() {
     }
 
     try {
+      console.log('🗑️ Deleting data source:', dataSource._id);
+      
       const response = await fetch(`${BASE_URL}/datasource/${dataSource._id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true', // Skip ngrok browser warning
           Authorization: `Bearer ${user?.token}`,
         },
       });
 
+      console.log('📡 Delete response status:', response.status);
+      console.log('📡 Delete response ok:', response.ok);
+      console.log('📡 Delete response content-type:', response.headers.get('content-type'));
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete data source');
+        console.error('❌ Delete response not ok, status:', response.status);
+        
+        const responseText = await response.text();
+        console.error('❌ Delete error response text:', responseText);
+        
+        const contentType = response.headers.get('content-type');
+        const isJson = contentType && contentType.includes('application/json');
+        
+        if (isJson && responseText) {
+          try {
+            const errorData = JSON.parse(responseText);
+            throw new Error(errorData.message || 'Failed to delete data source');
+          } catch (parseError) {
+            console.error('❌ Failed to parse delete error response as JSON:', parseError);
+            throw new Error(`Delete failed (${response.status}): ${responseText.substring(0, 200)}`);
+          }
+        } else {
+          throw new Error(`Delete failed (${response.status}): ${responseText || 'Unknown error'}`);
+        }
       }
 
+      console.log('✅ Data source deleted successfully');
       fetchDataSources();
     } catch (err) {
+      console.error('💥 Error deleting data source:', err);
       setError(err.message || 'An error occurred while deleting the data source');
     }
   };
@@ -234,8 +312,8 @@ export default function UserDataSources() {
                   p: 4,
                   borderRadius: 3,
                   background: (theme) => theme.palette.mode === 'dark'
-                    ? "linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.6) 100%)"
-                    : "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%)",
+                    ? "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 50%, rgba(51, 65, 85, 0.95) 100%)"
+                    : "linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.9) 50%, rgba(226, 232, 240, 0.8) 100%)",
                   backdropFilter: "blur(20px)",
                   border: (theme) => theme.palette.mode === 'dark'
                     ? "1px solid rgba(102, 126, 234, 0.2)"
@@ -243,11 +321,27 @@ export default function UserDataSources() {
                   boxShadow: (theme) => theme.palette.mode === 'dark'
                     ? "0 20px 40px rgba(0, 0, 0, 0.4)"
                     : "0 20px 40px rgba(0, 0, 0, 0.1)",
+                  position: "relative",
+                  overflow: "visible",
                 }}
               >
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2 }}>
+                {/* Background decoration */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: -20,
+                    right: -20,
+                    width: 100,
+                    height: 100,
+                    borderRadius: "50%",
+                    background: "linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))",
+                    opacity: 0.7,
+                  }}
+                />
+
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2, position: "relative", zIndex: 1 }}>
                   <Box>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1, overflow: "visible" }}>
                       <Box
                         sx={{
                           p: 1.5,
@@ -260,16 +354,18 @@ export default function UserDataSources() {
                       >
                         <StorageIcon sx={{ color: "white", fontSize: 24 }} />
                       </Box>
-                      <GradientText
-                        colors={["#667eea", "#764ba2", "#f093fb"]}
-                        animationSpeed={4}
-                        showBorder={false}
-                        className="text-2xl font-bold"
-                      >
-                        <Typography variant="h4" component="h1" sx={{ fontWeight: "bold", margin: 0 }}>
-                          Data Sources
-                        </Typography>
-                      </GradientText>
+                      <Box sx={{ overflow: "visible" }}>
+                        <GradientText
+                          colors={["#667eea", "#764ba2", "#f093fb"]}
+                          animationSpeed={4}
+                          showBorder={false}
+                          className="text-2xl font-bold"
+                        >
+                          <Typography variant="h4" component="h1" sx={{ fontWeight: "bold", margin: 0, lineHeight: 1.2, overflow: "visible" }}>
+                            Data Sources
+                          </Typography>
+                        </GradientText>
+                      </Box>
                     </Box>
                     <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500 }}>
                       Manage and configure your data sources. Connect Prometheus, Loki, or upload CSV files to start building powerful analytics dashboards.

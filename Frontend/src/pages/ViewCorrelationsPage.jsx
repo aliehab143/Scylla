@@ -38,6 +38,7 @@ export default function ViewCorrelationsPage() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
             Authorization: `Bearer ${user?.token}`,
           },
         });
@@ -125,8 +126,8 @@ export default function ViewCorrelationsPage() {
                   p: 4,
                   borderRadius: 3,
                   background: (theme) => theme.palette.mode === 'dark'
-                    ? "linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.6) 100%)"
-                    : "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%)",
+                    ? "linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 50%, rgba(51, 65, 85, 0.95) 100%)"
+                    : "linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.9) 50%, rgba(226, 232, 240, 0.8) 100%)",
                   backdropFilter: "blur(20px)",
                   border: (theme) => theme.palette.mode === 'dark'
                     ? "1px solid rgba(102, 126, 234, 0.2)"
@@ -134,11 +135,27 @@ export default function ViewCorrelationsPage() {
                   boxShadow: (theme) => theme.palette.mode === 'dark'
                     ? "0 20px 40px rgba(0, 0, 0, 0.4)"
                     : "0 20px 40px rgba(0, 0, 0, 0.1)",
+                  position: "relative",
+                  overflow: "visible",
                 }}
               >
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2 }}>
+                {/* Background decoration */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: -20,
+                    right: -20,
+                    width: 100,
+                    height: 100,
+                    borderRadius: "50%",
+                    background: "linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))",
+                    opacity: 0.7,
+                  }}
+                />
+
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2, position: "relative", zIndex: 1 }}>
                   <Box>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1, overflow: "visible" }}>
                       <Box
                         sx={{
                           p: 1.5,
@@ -151,16 +168,18 @@ export default function ViewCorrelationsPage() {
                       >
                         <ViewListIcon sx={{ color: "white", fontSize: 24 }} />
                       </Box>
-                      <GradientText
-                        colors={["#667eea", "#764ba2", "#f093fb"]}
-                        animationSpeed={4}
-                        showBorder={false}
-                        className="text-2xl font-bold"
-                      >
-                        <Typography variant="h4" component="h1" sx={{ fontWeight: "bold", margin: 0 }}>
-                          View Correlations
-                        </Typography>
-                      </GradientText>
+                      <Box sx={{ overflow: "visible" }}>
+                        <GradientText
+                          colors={["#667eea", "#764ba2", "#f093fb"]}
+                          animationSpeed={4}
+                          showBorder={false}
+                          className="text-2xl font-bold"
+                        >
+                          <Typography variant="h4" component="h1" sx={{ fontWeight: "bold", margin: 0, lineHeight: 1.2, overflow: "visible" }}>
+                            View Correlations
+                          </Typography>
+                        </GradientText>
+                      </Box>
                     </Box>
                     <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500 }}>
                       View and manage your data source correlations. Each correlation represents a connection between different data sources for unified analysis.

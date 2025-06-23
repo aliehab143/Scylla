@@ -66,6 +66,7 @@ export default function ProfilePage() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
             Authorization: `Bearer ${user?.token}`,
           },
         });
@@ -110,6 +111,7 @@ export default function ProfilePage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
           Authorization: `Bearer ${user?.token}`,
         },
         body: JSON.stringify({
@@ -432,7 +434,7 @@ export default function ProfilePage() {
                         >
                           <LinkIcon />
                         </Avatar>
-                        <Box>
+                    <Box>
                           <Typography variant="h4" sx={{ fontWeight: 700, color: "#f093fb" }}>
                             {userStats.correlations}
                           </Typography>
@@ -497,9 +499,9 @@ export default function ProfilePage() {
                       
                       <Divider sx={{ opacity: 0.3 }} />
                       
-                      <Box>
+                    <Box>
                         <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 600, mb: 1 }}>
-                          Account Type
+                        Account Type
                         </Typography>
                         <Chip
                           label="Standard User"
@@ -558,9 +560,9 @@ export default function ProfilePage() {
                       </Typography>
                     </Box>
 
-                    <form onSubmit={handleChangePassword}>
+                  <form onSubmit={handleChangePassword}>
                       <Stack spacing={3}>
-                        {error && (
+                      {error && (
                           <Alert 
                             severity="error" 
                             onClose={() => setError("")}
@@ -569,10 +571,10 @@ export default function ProfilePage() {
                               border: "1px solid rgba(244, 67, 54, 0.2)",
                             }}
                           >
-                            {error}
-                          </Alert>
-                        )}
-                        {success && (
+                          {error}
+                        </Alert>
+                      )}
+                      {success && (
                           <Alert 
                             severity="success" 
                             onClose={() => setSuccess("")}
@@ -581,17 +583,17 @@ export default function ProfilePage() {
                               border: "1px solid rgba(76, 175, 80, 0.2)",
                             }}
                           >
-                            {success}
-                          </Alert>
-                        )}
+                          {success}
+                        </Alert>
+                      )}
                         
-                        <TextField
-                          label="Current Password"
+                      <TextField
+                        label="Current Password"
                           type={showPasswords.current ? "text" : "password"}
-                          value={currentPassword}
-                          onChange={(e) => setCurrentPassword(e.target.value)}
-                          required
-                          fullWidth
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        required
+                        fullWidth
                           InputProps={{
                             endAdornment: (
                               <IconButton
@@ -613,13 +615,13 @@ export default function ProfilePage() {
                           }}
                         />
                         
-                        <TextField
-                          label="New Password"
+                      <TextField
+                        label="New Password"
                           type={showPasswords.new ? "text" : "password"}
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          required
-                          fullWidth
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                        fullWidth
                           InputProps={{
                             endAdornment: (
                               <IconButton
@@ -641,13 +643,13 @@ export default function ProfilePage() {
                           }}
                         />
                         
-                        <TextField
-                          label="Confirm New Password"
+                      <TextField
+                        label="Confirm New Password"
                           type={showPasswords.confirm ? "text" : "password"}
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          required
-                          fullWidth
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        fullWidth
                           InputProps={{
                             endAdornment: (
                               <IconButton
@@ -676,10 +678,10 @@ export default function ProfilePage() {
                           sparkRadius={20}
                           duration={500}
                         >
-                          <Button
-                            type="submit"
-                            variant="contained"
-                            disabled={loading}
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={loading}
                             sx={{
                               alignSelf: "flex-start",
                               background: "linear-gradient(135deg, #43e97b, #52ffb8)",
@@ -709,10 +711,10 @@ export default function ProfilePage() {
                             }}
                           >
                             {loading ? "Updating..." : "Update Password"}
-                          </Button>
+                      </Button>
                         </ClickSpark>
-                      </Stack>
-                    </form>
+                    </Stack>
+                  </form>
                   </Paper>
                 </Fade>
               </Grid>
@@ -746,7 +748,7 @@ export default function ProfilePage() {
                         <SettingsIcon />
                       </Avatar>
                       <Typography variant="h6" sx={{ fontWeight: 700, color: "#f093fb" }}>
-                        Preferences
+                    Preferences
                       </Typography>
                     </Box>
 
@@ -808,7 +810,7 @@ export default function ProfilePage() {
                       </Grid>
                       
                       <Grid item xs={12} md={4}>
-                        <Box>
+                    <Box>
                           <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 600, mb: 2 }}>
                             Language & Region
                           </Typography>
@@ -817,11 +819,11 @@ export default function ProfilePage() {
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
                             Default language setting
-                          </Typography>
-                        </Box>
+                      </Typography>
+                    </Box>
                       </Grid>
                     </Grid>
-                  </Paper>
+            </Paper>
                 </Fade>
               </Grid>
             </Grid>

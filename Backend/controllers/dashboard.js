@@ -1,6 +1,5 @@
 require('dotenv').config();
 const axios = require('axios');
-// const grafana_url = "http://localhost:3000";
 const grafanaAPI = require('../api/grafanaAPI');
 const dashboard = require('../models/Dashboard');
 const UserWorkflow = require('../models/UserWorkflow');
@@ -15,7 +14,8 @@ const path = require('path');
 const fs2 = require('fs').promises;
 const modelController = require('../controllers/model')
 const { infoLog, errorLog } = require('../logger');
-
+const { toUnixTimestamp, isUnixTimestamp } = require('../helpers/helper');
+const influxService = require('../services/influxService')
 
 const getAllDashboards = async (req, res) => {
   try {
@@ -45,18 +45,64 @@ const getDashboardDeprycated = async (req, res) => {
 };
 
 
+const prometheusToAnomalyDetection = async (start, end , query, limit) => {
+  
+  let bucket ="prometheus";
+  const prometheusData = await influxService.queryInflux(start, end, query, bucket, limit);
+  
+  // remove timestamp from prometheusData because i want to send values to model
+  const modifiedData = prometheusData.map(metrics => metrics._value);
+
+  console.log('modifiedData', modifiedData)
+  const modelResponse = await modelController.detectCpuAnomaly(modifiedData)
+  console.log('model response', modelResponse)
+  
+  const response = {
+    data: prometheusData.map(item => ({
+      timestamp: item._time,
+      value: item._value,
+      
+    })),
+    modelPrediction: modelResponse
+  }
+  
+  return response;
+}
+// get loki logs
+const getLokiLogs = async (hostURL, params) => {
+  console.log('in getLokiLogs function')
+  console.log('hostURL', hostURL, 'params', params)
+  const response = await axios.get(`${hostURL}/loki/api/v1/query_range`, { params });
+
+  const { data: { data: { result } } } = response;
+  console.log('result is ', result);
+
+  // Flatten and merge timestamp with parsed log object
+  const logs = result.flatMap(({ values }) =>
+    values.map(([timestamp, logLine]) => {
+      const parsedLog = JSON.parse(logLine.trim());
+      return {
+        timestamp,
+        ...parsedLog
+      };
+    })
+  );
+
+  return logs;
+};
+
 
 const getDashboardrById = async (req, res) => {
+  const user_id = req.user.id;
   try {
     const dashboard_id = req.params.uid;
     const data = await dashboard.findById({ _id: dashboard_id }).populate('datasource');
     const results = [];
-    
+
     console.log('host url  is ', data.datasource.hostURL)
 
 
     if (data.datasource.type === 'csv') {
-      const user_id = req.user.id;
       const csvFilePath = data.datasource.path;
       console.log(data.datasource.path)
       if (!fs.existsSync(csvFilePath)) {
@@ -80,103 +126,31 @@ const getDashboardrById = async (req, res) => {
     }
 
     else if (data.datasource.type === 'prometheus') {
-
-      const user_id = req.user.id;
-
-      const { query, start, end, step } = req.query;
-      // an earlier start for the model to detect detection
       
-      const earlierstart = Math.floor(parseFloat(start)) - 5 * 60 * 60; // Subtract 5 hours in seconds
-      const newstart = earlierstart.toString();
-      console.log(`new start is ${newstart} end is ${end} original start ${start}`)
+      let { query, start, end, step, limit } = req.query;
+      console.log('req.queries', req.query)
       
-      // Convert start and end to ISO format
-      const startFormatted = new Date(Math.floor(parseFloat(start)) * 1000).toISOString().slice(0, 19);
-      const endFormatted = new Date(Math.floor(parseFloat(end)) * 1000).toISOString().slice(0, 19);
-
-      const prometheusResponse = await axios.get(`${data.datasource.hostURL}/api/v1/query_range`, {
-        params: { query, start, end, step:14 }
-      });
-      
-      // Log the full URL from the request config
-      console.log('Full URL:', prometheusResponse.config.url + '?' + new URLSearchParams(prometheusResponse.config.params).toString());
-      // console.log('prometheus',prometheusResponse)
-
-      if (!prometheusResponse.data || !prometheusResponse.data.data) {
-        return res.status(400).json({ message: 'Invalid response from Prometheus API.' });
+      if(!start || !end) {
+        const now = new Date();
+        end = now.toISOString();
+        start = new Date(now - 0.5 * 60 * 60 * 1000).toISOString(); // 2 hours ago
       }
       
-      const result = prometheusResponse.data.data.result;
-      // console.log('reselt',result)
-
-      // console.log('result is ', temp); // Log the values of the second result (if exists)
-
-      if (!result || result.length === 0) {
-        return res.status(404).json({ message: 'No data returned for the selected metric.' });
+      let startUnix, endUnix;
+      if (!isUnixTimestamp(start)) {
+        startUnix = toUnixTimestamp(start);
+        endUnix = toUnixTimestamp(end);
+      } else {
+        startUnix = Number(start);
+        endUnix = Number(end);
       }
-
       
-      const timeSeriesData = result.flatMap((series) =>
-        series.values.map(([timestamp, value]) => ({
-          time: new Date(Math.floor(parseFloat(timestamp)) * 1000).toISOString().slice(0, 19),
-          value: parseFloat(value),
-        }))
-      );
-
-      
-      // console.log('Prometheus data:', timeSeriesData);
-
-      const modelInput = timeSeriesData;
-
-      // console.log('hamada 1 ')
-      // console.log('model input is ', JSON.stringify(modelInput))
-      // console.log('hamada 2 ')
-
-      // Record start time
-      const startTime = performance.now();
-
-      const modelResponse = await modelController.detectCpuAnomaly(modelInput);
-      // Record end time
-      const endTime = performance.now();
-
-      // Calculate duration in milliseconds
-      const durationMs = endTime - startTime;
-      console.log('time of await is ', durationMs)
-      // console.log('model response is ', modelResponse)
-
-
-      // filter to find orginal data 
-      const filteredModelResponse = modelResponse.filter((item) => {
-        // console.log('item is ',item)
-        // console.log('startformatted is ', startFormatted, 'end formatted is ', endFormatted);
-        const itemTime = new Date(item.time);
-        const startTime = new Date(startFormatted);
-        const endTime = new Date(endFormatted);
-        return itemTime >= startTime && itemTime <= endTime;
-      });
-
-      // console.log('final data', filteredModelResponse);
-
-      // format time from 2025-04-09T04:12:27 to 7:52:46 PM
-      const filteredModelResponseFormatted = filteredModelResponse.map((item) => ({
-        anomaly: item.anomaly,
-        time: new Date(item.time).toLocaleTimeString('en-US', {
-          hour12: true,
-          hour: 'numeric',
-          minute: '2-digit',
-          second: '2-digit'
-        }),
-        value: item.value
-      }));
+      const response = await prometheusToAnomalyDetection(startUnix, endUnix, query, limit);
 
       infoLog(user_id, 'get_dashboard_prometheus', dashboard_id);
-      // console.log('Filtered model response formatted:', filteredModelResponseFormatted);
-        // 8. Return results
-        return res.json({
-          data: modelResponse,
-          message: 'CPU data processed and searched',
-          // data: searchResults
-        });
+      return res.json(
+        response,
+      );
     }
 
     // 1st time get all logs
@@ -190,8 +164,6 @@ const getDashboardrById = async (req, res) => {
           * end defaults to now
         */
 
-        const user_id = req.user.id;
-
         // if no params return logs from last 1 hr
         const now = new Date();
         const end1 = now.toISOString();
@@ -202,42 +174,16 @@ const getDashboardrById = async (req, res) => {
 
         // Parameters for fetching large dataset from Loki
         const fetchParams = {
-          query: query || '{job="express_logs"}',
+          query: query || '{job="cloud-server-logs"}',
           limit: parseInt(limit) || 10, // Increased limit for broader data
           start: defaultStart, // Use early start time for broad data fetch
           end: end1
         };
 
-        const response = await axios.get(`${data.datasource.hostURL}/loki/api/v1/query_range`, { params: fetchParams });
-        
-        const { data: { data: { result } } } = response;
-        console.log('result is ', result)
-
-        // Flatten all log values from all streams
-
-
-        const logs = result.flatMap(({ values }) =>
-          values.map(([timestamp, logLine]) => ({
-            timestamp,
-            log: JSON.parse(logLine.trim()) // assuming logLine is JSON
-          }))
-        );
-    
+       const logs = await getLokiLogs(data.datasource.hostURL, fetchParams);
 
         infoLog(user_id, 'get_dashboard_loki', dashboard_id);
         return res.json(logs)
-        
-        // get logs from file
-      // console.log(__dirname)
-      //   const logFilePath = path.join(__dirname, '..', 'GenerateLogsServer','logs', 'app.log');
-      // console.log('Reading logs from:', logFilePath);
-
-      // // Read and parse logs from file (allLogs matches app.log structure)
-      // const allLogs = await parseLogFile(logFilePath);
-
-
-      // res.json({data: allLogs})
-
 
 
       } catch (error) {
@@ -359,85 +305,6 @@ const deleteDashboard = async (req, res) => {
 };
 
 
-
-
-
-const getLokiLogs = async (req, res) => {
-  try {
-
-    // last 1 hr
-    const now = new Date();
-    const end1 = now.toISOString();
-    const start1 = new Date(now - 60 * 60 * 1000).toISOString();
-
-
-    const dashboard_id = req.params.uid;
-    const data = await Dashboard.findById({ _id: dashboard_id }).populate('datasource');
-
-
-    const { query, limit, start, end } = req.query;
-
-    const params = {
-      query: query || '{job="express_logs"}',
-      limit: parseInt(limit) || 10,
-      start: start || start1,
-      end: end || end1
-    };
-
-    // Normalize the base URL by removing trailing slashes
-    const baseUrl = data.datasource.hostURL.replace(/\/+$/, '');
-    const url = `${baseUrl}/loki/api/v1/query_range`;
-
-    console.log('Requesting URL:', url, 'with params:', params); // For debugging
-
-    const response = await axios.get(url, { params });
-    console.log('response', response)
-
-
-    // Parse and format logs
-    const logs = response.data.data.result.flatMap(stream =>
-      stream.values.map(([timestamp, line]) => {
-        let parsedLine = {};
-        try {
-          if (typeof line === 'string' && line.trim()) {
-            parsedLine = JSON.parse(line);
-          } else {
-            parsedLine.raw = line || '';
-          }
-        } catch (e) {
-          parsedLine.raw = line;
-        }
-
-        return {
-          logTimestamp: new Date(parseInt(timestamp) / 1000000).toISOString(),
-          level: parsedLine.level || 'unknown',
-          message: parsedLine.message || (parsedLine.raw !== undefined ? parsedLine.raw : ''),
-          method: parsedLine.method || 'N/A',
-          requestTimestamp: parsedLine.timestamp || 'N/A',
-          url: parsedLine.url || 'N/A'
-        };
-      })
-    );
-
-    const sortedLogs = logs.sort((a, b) => new Date(b.logTimestamp) - new Date(a.logTimestamp)).slice(0, params.limit);
-
-    res.json({
-      status: 'success',
-      logs: sortedLogs,
-    });
-
-
-  } catch (error) {
-    console.error('Error fetching logs from Loki:', error.message);
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to fetch logs',
-      error: error.message
-    });
-  }
-};
-
-
 // Function to parse concatenated JSON logs from file
 const parseLogFile = async (filePath) => {
   try {
@@ -480,7 +347,7 @@ const fetchLokiDataFile = async (res = null) => {
     const defaultStart = new Date(now - 60 * 60 * 1000).toISOString(); // Default to last hour
 
     // Define log file path
-    const logFilePath = path.join(__dirname, '..', 'Generate logs Server','logs', 'app.log');
+    const logFilePath = path.join(__dirname, '..', 'Generate logs Server', 'logs', 'app.log');
     console.log('Reading logs from:', logFilePath);
 
     // Read and parse logs from file (allLogs matches app.log structure)
@@ -533,7 +400,8 @@ module.exports = {
   addDashboard,
   addDatasource,
   deleteDashboard,
-  getLokiLogs,
   fetchLokiDataFile,
 
+  prometheusToAnomalyDetection,
+  getLokiLogs,
 };

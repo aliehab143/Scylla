@@ -8,15 +8,19 @@ router.route('/anomlay').get(anomlay)
 
 
 router.route('/temp_anomaly_detector').post(validateJWT, detectTempAnomaly);
-router.route('/cpu_anomaly_detector').post(validateJWT, async (req, res) => {
-    const { data } = req.body
 
-    const response = await detectCpuAnomaly(data)
+
+router.route('/cpu_anomaly_detector').post(validateJWT, async (req, res) => {
+    const { values } = req.body
+ 
+    const response = await detectCpuAnomaly(values)
     res.json(response)
 });
+
+
 router.route('/logs_anomaly_detector/json').post(validateJWT, async (req, res) => {
     // data -> logs
-    const { data } = req.body;
+    const data = req.body;
     console.log('data is ', data)
     const response = await detectLogsAnomaly(data);
     res.json(response);

@@ -111,6 +111,7 @@ export default function PrometheusDataSourceFormPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
           Authorization: `Bearer ${user?.token}`,
         },
         body: JSON.stringify(formData),

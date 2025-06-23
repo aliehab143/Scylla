@@ -7,6 +7,7 @@ const UserWorkflow = require('../models/UserWorkflow');
 const promethus = require('../api/promethus');
 const DataSource = require('../models/DataSource');
 const dashboard = require('../models/Dashboard');
+const DataCorrelation = require('../models/DataCorrelation');
 const { infoLog, errorLog } = require('../logger');
 
 const LOKI_URL = 'http://localhost:3100/loki/api/v1/push';
@@ -48,15 +49,15 @@ const getAllDatasourcesDeprycated = async (req, res) => {
 
 const getDatasourceById = async (req, res) => {
   try {
-    
+
     const datasourceId = req.params.id;
     const data = await datasource.findById({ _id: datasourceId });
 
     if (!data) {
       return res.status(404).json({ error: 'Datasource not found.' });
     }
-    
-    res.json( data );
+
+    res.json(data);
   } catch (error) {
     console.error('Error fetching datasource:', error.message);
     res.status(500).json({ error: 'Internal server error.', details: error.message });
@@ -88,7 +89,7 @@ const uploadCSV = async (req, res, next) => {
     await userworkflow.save();
 
     infoLog(user_id, 'upload_csv', datasource_id);
-    
+
     res.json(savedDatasource);
 
   } catch (error) {
@@ -103,7 +104,7 @@ const uploadCSV = async (req, res, next) => {
 // post Datasource --> grafana
 // add Datasource --> mongo
 // add ds is addDatasource ---> mongo
-const addDatasource = async (req, res) => { 
+const addDatasource = async (req, res) => {
   try {
     const { hostURL, type } = req.body;
     // Validate Prometheus host URL
@@ -131,15 +132,15 @@ const addDatasource = async (req, res) => {
     }
 
     const user_id = req.user.id; // Extract the user ID from the request object
-    
+
 
     // Create a new datasource record in the database
     const savedDatasource = await datasource.create(req.body);
     const datasourceId = savedDatasource._id;
 
     // Find the user's workflow by their user ID
-    const userworkflow = await UserWorkflow.findOne( {user_id} );
-    console.log('userworkflow',userworkflow)
+    const userworkflow = await UserWorkflow.findOne({ user_id });
+    console.log('userworkflow', userworkflow)
 
 
     if (!userworkflow) {
@@ -149,13 +150,13 @@ const addDatasource = async (req, res) => {
     // Add the new datasource ID to the user's workflow
     userworkflow.datasources.push(datasourceId);
     await userworkflow.save();
-    
-    
+
+
     infoLog(user_id, 'add_datasource', datasourceId);
 
     res.json(savedDatasource);
 
-    
+
   } catch (error) {
 
     errorLog(user_id, 'failed_add_datasource', error.message);
@@ -171,19 +172,50 @@ const getPrometheusMetrics = async (req, res) => {
     // Fix: Removed unnecessary curly braces around _id and added proper query syntax
     const source = await dashboard.findById(req.params.id).populate('datasource');
     console.log(source);
-    
+
     if (!source || !source.datasource) {
       return res.status(404).json({ message: 'Dashboard or datasource not found' });
     }
-    
+
     // Fix: Added template literal syntax with backticks
     const response = await axios.get(`${source.datasource.hostURL}/api/v1/label/__name__/values`);
     console.log(response);
-    
+
     const data = response.data.data;
 
     res.json({ data }); // 'data' is already defined, no need to rename it
-    
+
+  } catch (error) {
+    console.error('Error:', error.message);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getPrometheusMetrics2 = async (req, res) => {
+  try {
+    const source = await DataCorrelation.findById(req.params.id)
+      .populate('datasources'); // Populates the referenced DataSources
+    if (!source) {
+      return res.status(404).json({ error: 'DataCorrelation not found' });
+    }
+
+    if (!source.datasources || source.datasources.length === 0) {
+      return res.status(404).json({ message: 'No datasources found for this DataCorrelation' });
+    }
+    console.log('source', source)
+    for (const ds of source.datasources) {
+      if (ds.type === 'prometheus') {
+        try {
+          const response = await axios.get(`${ds.hostURL}/api/v1/label/__name__/values`);
+          const data = response.data.data;
+          return res.json({ data });
+        } catch (error) {
+          return res.status(500).json({ message: `Failed to fetch metrics from Prometheus datasource: ${error.message}` });
+        }
+      }
+    }
+    // If no prometheus datasource found
+    return res.json({ data: 'no prometheus datasource' });
   } catch (error) {
     console.error('Error:', error.message);
     res.status(500).json({ message: error.message });
@@ -193,17 +225,17 @@ const getPrometheusMetrics = async (req, res) => {
 
 
 
-const getLokiQueries = async (req,res) => {
+const getLokiQueries = async (req, res) => {
   try {
     const hostURL = "http://localhost:3100";
     const response = await axios.get(`${hostURL}/api/v1/label/__name__/values`);
     console.log(response)
     const data = response.data.data;
-    res.json({data}); 
+    res.json({ data });
   } catch (error) {
     console.error('Error:', error.message);
     res.status(500).json({ message: error.message });
-    
+
   }
 
 };
@@ -258,22 +290,22 @@ const deleteDatasource = async (req, res) => {
 };
 
 
-const updateDatasource = async (req , res) =>{
+const updateDatasource = async (req, res) => {
   try {
-      const updatedProduct = await DataSource.findByIdAndUpdate(
-          {_id:req.params.id},
-          {$set:req.body},
-          {new:true}
-      );
+    const updatedProduct = await DataSource.findByIdAndUpdate(
+      { _id: req.params.id },
+      { $set: req.body },
+      { new: true }
+    );
 
-      infoLog(user_id, 'update_datasource', req.params.id);
+    infoLog(user_id, 'update_datasource', req.params.id);
 
-      return res.status(201).json(updatedProduct)
+    return res.status(201).json(updatedProduct)
   } catch (error) {
 
-      errorLog(user_id, 'failed_update_datasource', error.message);
+    errorLog(user_id, 'failed_update_datasource', error.message);
 
-      return res.status(500).json({msg:error})
+    return res.status(500).json({ msg: error })
   }
 }
 
@@ -305,5 +337,6 @@ module.exports = {
   updateDatasource,
   sendToLoki,
   getPrometheusMetrics,
+  getPrometheusMetrics2,
 
 };

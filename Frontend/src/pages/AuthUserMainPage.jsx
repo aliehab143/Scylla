@@ -49,6 +49,7 @@ export default function AuthUserMainPage() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+              "ngrok-skip-browser-warning": "true",
             Authorization: `Bearer ${user?.token}`,
           },
         });
@@ -298,8 +299,8 @@ export default function AuthUserMainPage() {
                             </Avatar>
                             <Box>
                               <Typography variant="h4" sx={{ fontWeight: 700, color: "#667eea" }}>
-                                {dashboards.length}
-                              </Typography>
+                        {dashboards.length}
+                      </Typography>
                               <Typography variant="subtitle1" color="text.secondary" sx={{ fontWeight: 600 }}>
                                 Dashboards
                               </Typography>
@@ -345,8 +346,8 @@ export default function AuthUserMainPage() {
                             </Avatar>
                             <Box>
                               <Typography variant="h4" sx={{ fontWeight: 700, color: "#43e97b" }}>
-                                {dataSources.length}
-                              </Typography>
+                        {dataSources.length}
+                      </Typography>
                               <Typography variant="subtitle1" color="text.secondary" sx={{ fontWeight: 600 }}>
                                 Data Sources
                               </Typography>
@@ -392,8 +393,8 @@ export default function AuthUserMainPage() {
                             </Avatar>
                             <Box>
                               <Typography variant="h4" sx={{ fontWeight: 700, color: "#f093fb" }}>
-                                {datacorrelations.length}
-                              </Typography>
+                        {datacorrelations.length}
+                      </Typography>
                               <Typography variant="subtitle1" color="text.secondary" sx={{ fontWeight: 600 }}>
                                 Correlations
                               </Typography>
@@ -404,7 +405,7 @@ export default function AuthUserMainPage() {
                             <Typography variant="body2" color="text.secondary">
                               Analyzing patterns
                             </Typography>
-                          </Box>
+                      </Box>
                         </CardContent>
                       </Card>
                     </Fade>

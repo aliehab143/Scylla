@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { validateJWT } = require('../Middleware/validateJWT');
-const { uploadCSV, getCsv, addDatasource, getDatasourceById, deleteDatasource, updateDatasource , getPrometheusMetrics} = require('../controllers/datasource');
+const { uploadCSV, getCsv, addDatasource, getDatasourceById, deleteDatasource, updateDatasource , getPrometheusMetrics, getPrometheusMetrics2} = require('../controllers/datasource');
 
 const multer = require('multer')
 const upload = require('../Middleware/upload');
@@ -15,6 +15,8 @@ router.route('/new').post(validateJWT, addDatasource);
 
 // get promethus quires 
 router.route("/prometheus/get-queries/:id").get(validateJWT, getPrometheusMetrics);
+// get promethus quires in correlation
+router.route("/prometheus/queries/correlation/:id").get(validateJWT, getPrometheusMetrics2);
 
 
 // Get , Update ,Delete datasource

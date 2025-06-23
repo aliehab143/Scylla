@@ -2,19 +2,27 @@ import { Card, CardContent, Typography, Box, List, Chip, Avatar } from '@mui/mat
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import LinkIcon from '@mui/icons-material/Link';
 import DataSourceListItem from './DataSourceListItem';
+import { useNavigate } from 'react-router-dom';
 
 export default function CorrelationCard({ correlation, dataSources }) {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/correlation/${correlation._id}`);
+  };
   const connectedSources = correlation.datasources?.map((sourceId) => {
     return dataSources.find(s => s._id === sourceId);
   }).filter(Boolean) || [];
 
-  return (
-    <Card 
-      sx={{ 
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        borderRadius: 3,
+      return (
+      <Card 
+        onClick={handleCardClick}
+        sx={{ 
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: 3,
+          cursor: 'pointer',
         background: (theme) => theme.palette.mode === 'dark'
           ? "linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(51, 65, 85, 0.6) 100%)"
           : "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%)",

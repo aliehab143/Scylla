@@ -20,7 +20,11 @@ import LokiDataSourceFormPage from "./pages/LokiDataSourceFormPage";
 import ProfilePage from "./pages/ProfilePage";
 import CorrelateDataSourcesPage from "./pages/CorrelateDataSourcesPage";
 import ViewCorrelationsPage from "./pages/ViewCorrelationsPage";
+import CorrelationDetailsPage from "./pages/CorrelationDetailsPage";
 import LokiDashboardPage from "./pages/LokiDashboardPage";
+import TrainLogsModelPage from "./pages/TrainLogsModelPage";
+import TrainMetricsModelPage from "./pages/TrainMetricsModelPage";
+import AutomatedResponsePage from "./pages/AutomatedResponsePage";
 
 
 function App() {
@@ -58,7 +62,11 @@ function App() {
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/datasources/correlate" element={<CorrelateDataSourcesPage />} />
                 <Route path="/datasources/correlations" element={<ViewCorrelationsPage />} />
+                <Route path="/correlation/:id" element={<CorrelationDetailsPage />} />
                 <Route path="/dashboard/loki/:id" element={<LokiDashboardPage />} />
+                <Route path="/train-model/logs" element={<TrainLogsModelPage />} />
+                <Route path="/train-model/metrics" element={<TrainMetricsModelPage />} />
+                <Route path="/automated-response" element={<AutomatedResponsePage />} />
               </Route>
             </Routes>
           </BrowserRouter>

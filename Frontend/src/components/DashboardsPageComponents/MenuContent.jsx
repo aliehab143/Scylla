@@ -16,11 +16,17 @@ import StorageRoundedIcon from '@mui/icons-material/StorageRounded';
 import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
 import ViewListRoundedIcon from '@mui/icons-material/ViewListRounded';
 import LinkRoundedIcon from '@mui/icons-material/LinkRounded';
+import ModelTrainingIcon from '@mui/icons-material/ModelTraining';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import TimelineIcon from '@mui/icons-material/Timeline';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import ClickSpark from '../blocks/Animations/ClickSpark/ClickSpark';
 
-const StyledListItemButton = styled(ListItemButton)(({ theme, active }) => ({
+const StyledListItemButton = styled(ListItemButton, {
+  shouldForwardProp: (prop) => prop !== 'active',
+})(({ theme, active }) => ({
   borderRadius: '12px',
   margin: '4px 0',
   padding: '12px 16px',
@@ -85,7 +91,9 @@ const StyledListItemButton = styled(ListItemButton)(({ theme, active }) => ({
   }
 }));
 
-const StyledSubListItemButton = styled(ListItemButton)(({ theme, active }) => ({
+const StyledSubListItemButton = styled(ListItemButton, {
+  shouldForwardProp: (prop) => prop !== 'active',
+})(({ theme, active }) => ({
   borderRadius: '8px',
   margin: '2px 0',
   padding: '8px 12px',
@@ -124,6 +132,7 @@ const MenuIndicator = styled(Box)(() => ({
 export default function MenuContent() {
   const [openDataSources, setOpenDataSources] = useState(false);
   const [openDashboards, setOpenDashboards] = useState(false);
+  const [openTrainModel, setOpenTrainModel] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -133,6 +142,10 @@ export default function MenuContent() {
 
   const toggleDashboards = () => {
     setOpenDashboards((prevOpen) => !prevOpen);
+  };
+
+  const toggleTrainModel = () => {
+    setOpenTrainModel((prevOpen) => !prevOpen);
   };
 
   const handleNavigate = (route) => {
@@ -207,6 +220,36 @@ export default function MenuContent() {
           route: '/datasources/correlations'
         }
       ]
+    },
+    {
+      id: 'train-model',
+      label: 'Train Your Own Model',
+      icon: <ModelTrainingIcon />,
+      expandable: true,
+      expanded: openTrainModel,
+      onToggle: toggleTrainModel,
+      badge: null,
+      children: [
+        {
+          id: 'train-logs-model',
+          label: 'Train Logs Model',
+          icon: <TimelineIcon />,
+          route: '/train-model/logs'
+        },
+        {
+          id: 'metrics-model',
+          label: 'Metrics Model',
+          icon: <AnalyticsIcon />,
+          route: '/train-model/metrics'
+        }
+      ]
+    },
+    {
+      id: 'automated-response',
+      label: 'Automated Response',
+      icon: <AutoFixHighIcon />,
+      route: '/automated-response',
+      badge: null
     }
   ];
 
@@ -314,7 +357,7 @@ export default function MenuContent() {
                               }}
                             >
                               {child.icon}
-                            </ListItemIcon>
+                </ListItemIcon>
                             
                             <ListItemText 
                               primary={child.label}
@@ -351,12 +394,12 @@ export default function MenuContent() {
                           </StyledSubListItemButton>
                         </ClickSpark>
                       </Box>
-                    </ListItem>
+        </ListItem>
                   ))}
-                </List>
-              </Collapse>
+            </List>
+          </Collapse>
             )}
-          </ListItem>
+        </ListItem>
         ))}
       </List>
     </Stack>

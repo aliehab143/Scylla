@@ -9,6 +9,8 @@ import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Fade from "@mui/material/Fade";
+import CircularProgress from "@mui/material/CircularProgress";
+import Backdrop from "@mui/material/Backdrop";
 import SideMenu from "../components/DashboardsPageComponents/SideMenu";
 import AppNavbar from "../components/DashboardsPageComponents/AppNavbar";
 import Header from "../components/DashboardsPageComponents/Header";
@@ -30,6 +32,7 @@ export default function CorrelateDataSourcesPage() {
   const [selectedPrometheusSource, setSelectedPrometheusSource] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
   const [success, setSuccess] = useState(null);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -42,6 +45,7 @@ export default function CorrelateDataSourcesPage() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
             Authorization: `Bearer ${user?.token}`,
           },
         });
@@ -93,6 +97,9 @@ export default function CorrelateDataSourcesPage() {
       return;
     }
 
+    setCreating(true);
+    setError(null);
+
     const correlationData = {
       name: correlationName,
       datasourceIds: [selectedLokiSource._id, selectedPrometheusSource._id]
@@ -105,6 +112,7 @@ export default function CorrelateDataSourcesPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
           Authorization: `Bearer ${user?.token}`,
         },
         body: JSON.stringify(correlationData),
@@ -119,10 +127,12 @@ export default function CorrelateDataSourcesPage() {
       setSelectedLokiSource(null);
       setSelectedPrometheusSource(null);
       setError(null);
-      setSuccess("Correlation created successfully!");
+      setSuccess("Dashboard created successfully!");
     } catch (error) {
       console.error("Error creating correlation:", error);
       setError(error.message);
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -133,6 +143,37 @@ export default function CorrelateDataSourcesPage() {
   return (
     <div>
       <CssBaseline enableColorScheme />
+      
+      {/* Loading Backdrop */}
+      <Backdrop
+        sx={{ 
+          color: '#fff', 
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          backdropFilter: 'blur(10px)',
+          background: 'rgba(0, 0, 0, 0.5)'
+        }}
+        open={creating}
+      >
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+          <CircularProgress 
+            color="inherit" 
+            size={60}
+            thickness={4}
+            sx={{
+              '& .MuiCircularProgress-circle': {
+                strokeLinecap: 'round',
+              }
+            }}
+          />
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Creating Correlation...
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Please wait while we set up your correlation
+          </Typography>
+        </Box>
+      </Backdrop>
+
       <Box sx={{ display: "flex", minHeight: "100vh" }}>
         <SideMenu />
         <Box
@@ -373,7 +414,7 @@ export default function CorrelateDataSourcesPage() {
                                          <Button
                        variant="contained"
                        onClick={handleCorrelate}
-                       disabled={!selectedLokiSource || !selectedPrometheusSource || !correlationName.trim() || loading}
+                       disabled={!selectedLokiSource || !selectedPrometheusSource || !correlationName.trim() || creating}
                        sx={{
                          minWidth: 200,
                          height: 48,
@@ -408,7 +449,7 @@ export default function CorrelateDataSourcesPage() {
                          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                        }}
                      >
-                      {loading ? 'Creating...' : 'Create Correlation'}
+                      {creating ? 'Creating dashboard...' : 'Create Correlation'}
                     </Button>
                   </ClickSpark>
                 </Box>

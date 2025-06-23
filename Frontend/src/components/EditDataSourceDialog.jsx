@@ -31,6 +31,7 @@ export default function EditDataSourceDialog({ open, onClose, dataSource, onUpda
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({

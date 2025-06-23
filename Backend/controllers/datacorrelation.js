@@ -2,6 +2,9 @@ const axios = require('axios');
 const Datasource = require('../models/DataSource');
 const DataCorrelation = require('../models/DataCorrelation');
 const UserWorkflow = require('../models/UserWorkflow');
+const { prometheusToAnomalyDetection, getLokiLogs } = require('./dashboard');
+const { toUnixTimestamp, isUnixTimestamp } = require('../helpers/helper');
+
 
 const createDataCorrelation = async (req, res) => {
     try {
@@ -50,11 +53,102 @@ const getDataCorrelation = async (req, res) => {
         if (!dataCorrelation) {
             return res.status(404).json({ error: 'DataCorrelation not found' });
         }
-        res.json(dataCorrelation);
+        
+        const { start, end, query, limit } = req.query;
+        const correlationResults = [];
+        
+        // Iterate through each datasource in the correlation
+        for (const datasource of dataCorrelation.datasources) {
+            console.log(`Processing datasource: ${datasource.name} (${datasource.type})`);
+            
+            if (datasource.type === 'prometheus') {
+                try {
+                    // Set default time range if not provided
+                    let startTime = start, endTime = end;
+                    if (!startTime || !endTime) {
+                        const now = new Date();
+                        endTime = now.toISOString();
+                        startTime = new Date(now - 0.5 * 60 * 60 * 1000).toISOString(); // 30 minutes ago
+                    }
+                    
+                    // Convert to Unix timestamp if needed
+                    let startUnix, endUnix;
+                    if (!isUnixTimestamp(startTime)) {
+                        startUnix = toUnixTimestamp(startTime);
+                        endUnix = toUnixTimestamp(endTime);
+                    } else {
+                        startUnix = Number(startTime);
+                        endUnix = Number(endTime);
+                    }
+                    
+                    const prometheusData = await prometheusToAnomalyDetection(startUnix, endUnix, query, limit);
+                    correlationResults.push({
+                        data: prometheusData
+
+                    });
+                
+                } catch (error) {
+                    console.error(`Error processing Prometheus datasource ${datasource.name}:`, error);
+                    correlationResults.push({
+                        datasourceId: datasource._id,
+                        datasourceName: datasource.name,
+                        datasourceType: datasource.type,
+                        error: error.message
+                    });
+                }
+            } else if (datasource.type === 'loki') {
+                try {
+                    // Set default parameters for Loki
+                    const now = new Date();
+                    const endTime = end || now.toISOString();
+                    const defaultStart = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days ago
+                    const startTime = start || defaultStart;
+                    
+                    const fetchParams = {
+                        query: '{job="cloud-server-logs"}',
+                        limit: parseInt(limit) || 30,
+                        start: startTime,
+                        end: endTime
+                    };
+                    
+
+                    console.log('hosturl', datasource.hostURL)
+                    const lokiLogs = await getLokiLogs(datasource.hostURL, fetchParams);
+                    correlationResults.push({
+                        logs: lokiLogs
+                    });
+                } catch (error) {
+                    console.error(`Error processing Loki datasource ${datasource.name}:`, error);
+                    correlationResults.push({
+                        datasourceId: datasource._id,
+                        datasourceName: datasource.name,
+                        datasourceType: datasource.type,
+                        error: error.message
+                    });
+                }
+            } else {
+                // Handle other datasource types or unknown types
+                correlationResults.push({
+                    datasourceId: datasource._id,
+                    datasourceName: datasource.name,
+                    datasourceType: datasource.type,
+                    error: `Unsupported datasource type: ${datasource.type}`
+                });
+            }
+        }
+
+        console.log('Correlation results:', correlationResults);
+
+        res.json({
+            correlation: dataCorrelation,
+            results: correlationResults
+        });
     } catch (error) {
+        console.error('Error in getDataCorrelation:', error);
         res.status(500).json({ error: error.message });
     }
 }
+
 
 
 
