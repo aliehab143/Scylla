@@ -248,6 +248,13 @@ GPT_API_KEY=your-openai-api-key
 N8N_WEBHOOK_URL=your-n8n-webhook-url
 ```
 
+## 🧑‍💻 Team Members & Contact Emails
+- **Ali Ehab** – [aliehab143@gmail.com](mailto:aliehab143@gmail.com)  
+- **Begol Osama** – [begol.labeb@gmail.com](mailto:begol.labeb@gmail.com)  
+- **Ahmed Mokhtar** – [ahmedmokhtar2407@gmail.com](mailto:ahmedmokhtar2407@gmail.com)  
+- **Ramez Fathi** – [ramezfathi@gmail.com](mailto:ramezfathi@gmail.com)  
+- **Ayten Hossam** – [ayten55zoweil@yahoo.com](mailto:ayten55zoweil@yahoo.com)  
+- **Mohamed Sabry** – [sabrybmohamed@gmail.com](mailto:sabrybmohamed@gmail.com)
 ---
 
 **Scylla** - AI-Powered Security & Anomaly Detection with Intelligent Automation 🚀
